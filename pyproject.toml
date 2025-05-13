@@ -1,0 +1,25 @@
+[project]
+name = "house-price-predictor"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "juan-c-s", email = "juancamilo.salazar2002@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.10.3",
+    "pandas>=2.2.3",
+]
+
+[project.scripts]
+house-price-predictor = "house_price_predictor:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+]
