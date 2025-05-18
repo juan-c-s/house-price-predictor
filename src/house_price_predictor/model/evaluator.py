@@ -1,0 +1,2 @@
+
+# Clase abstracta Estimator (Strategy)
