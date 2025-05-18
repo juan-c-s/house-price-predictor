@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/521658517913579349/f08b084234d849bb9186d6c304a5ae9e/artifacts
+end_time: 1747527468879
+entry_point_name: ''
+experiment_id: '521658517913579349'
+lifecycle_stage: active
+run_id: f08b084234d849bb9186d6c304a5ae9e
+run_name: XGBRegressor
+run_uuid: f08b084234d849bb9186d6c304a5ae9e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747527466446
+status: 3
+tags: []
+user_id: juancamilosalazar

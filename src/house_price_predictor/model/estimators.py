@@ -1,4 +1,4 @@
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, r2_score, mean_squared_error, mean_absolute_percentage_error, max_error
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, r2_score, mean_squared_error, mean_absolute_percentage_error, max_error, mean_absolute_error
 from sklearn.base import BaseEstimator
 import numpy as np
 import mlflow
@@ -33,43 +33,51 @@ class Estimator:
         Calcula varias métricas de evaluación relevantes.
         """
         print(f"Evaluando el modelo: {self.estimator_name}") # Añadido para claridad
-        if y_pred.ndim > 1 and y_pred.shape[1] > 1:
-            # Manejar el caso de clasificación multiclase
-            accuracy = accuracy_score(y_true, np.argmax(y_pred, axis=1))
-            precision = precision_score(y_true, np.argmax(y_pred, axis=1), average='macro', zero_division=0)
-            recall = recall_score(y_true, np.argmax(y_pred, axis=1), average='macro', zero_division=0)
-            f1 = f1_score(y_true, np.argmax(y_pred, axis=1), average='macro', zero_division=0)
-            return {
-                "accuracy": accuracy,
-                "precision": precision,
-                "recall": recall,
-                "f1": f1,
-            }
-        elif y_true.dtype in ['int64', 'int32', 'int8', 'bool']:
-            # Manejar el caso de clasificación binaria
-            accuracy = accuracy_score(y_true, y_pred)
-            precision = precision_score(y_true, y_pred, zero_division=0)
-            recall = recall_score(y_true, y_pred, zero_division=0)
-            f1 = f1_score(y_true, y_pred, zero_division=0)
-            return {
-                "accuracy": accuracy,
-                "precision": precision,
-                "recall": recall,
-                "f1": f1,
-            }
-        else:
-            # Manejar el caso de regresión
+
+        # If predictions are continuous, use regression metrics
+        if np.issubdtype(y_pred.dtype, np.floating) or np.issubdtype(y_pred.dtype, np.complexfloating):
             r2 = r2_score(y_true, y_pred)
             mse = mean_squared_error(y_true, y_pred)
-            rmse = np.sqrt(mse)  # Calculate RMSE from MSE
+            mae = mean_absolute_error(y_true, y_pred)
+            rmse = np.sqrt(mse)
             max_err = max_error(y_true, y_pred)
             mape = mean_absolute_percentage_error(y_true, y_pred)
             return {
                 "r2": r2,
                 "rmse": rmse,
+                "mse": mse,
+                "mae": mae,
                 "max_error": max_err,
                 "mape": mape
             }
+        # If predictions are integer and match the set of true labels, use classification metrics
+        elif np.issubdtype(y_pred.dtype, np.integer) or np.issubdtype(y_pred.dtype, np.bool_):
+            if y_pred.ndim > 1 and y_pred.shape[1] > 1:
+                # Multiclass classification
+                accuracy = accuracy_score(y_true, np.argmax(y_pred, axis=1))
+                precision = precision_score(y_true, np.argmax(y_pred, axis=1), average='macro', zero_division=0)
+                recall = recall_score(y_true, np.argmax(y_pred, axis=1), average='macro', zero_division=0)
+                f1 = f1_score(y_true, np.argmax(y_pred, axis=1), average='macro', zero_division=0)
+                return {
+                    "accuracy": accuracy,
+                    "precision": precision,
+                    "recall": recall,
+                    "f1": f1,
+                }
+            else:
+                # Binary or multiclass classification
+                accuracy = accuracy_score(y_true, y_pred)
+                precision = precision_score(y_true, y_pred, average='macro', zero_division=0)
+                recall = recall_score(y_true, y_pred, average='macro', zero_division=0)
+                f1 = f1_score(y_true, y_pred, average='macro', zero_division=0)
+                return {
+                    "accuracy": accuracy,
+                    "precision": precision,
+                    "recall": recall,
+                    "f1": f1,
+                }
+        else:
+            raise ValueError("Unknown prediction type for evaluation.")
 
 
 # Clase concreta para estimadores de Scikit-learn
