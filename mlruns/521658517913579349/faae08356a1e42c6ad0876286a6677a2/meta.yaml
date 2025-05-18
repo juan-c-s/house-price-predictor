@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/521658517913579349/faae08356a1e42c6ad0876286a6677a2/artifacts
+end_time: 1747531949436
+entry_point_name: ''
+experiment_id: '521658517913579349'
+lifecycle_stage: active
+run_id: faae08356a1e42c6ad0876286a6677a2
+run_name: house_price_prediction
+run_uuid: faae08356a1e42c6ad0876286a6677a2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747531942339
+status: 3
+tags: []
+user_id: juancamilosalazar

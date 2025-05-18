@@ -1,7 +1,7 @@
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, r2_score, mean_squared_error, mean_absolute_percentage_error, max_error, mean_absolute_error
 from sklearn.base import BaseEstimator
 import numpy as np
-import mlflow
+
 
 class Estimator:
     """
@@ -91,7 +91,7 @@ class ScikitLearnEstimator(Estimator):
         super().__init__(*args, **kwargs)
         self.model = model
         self.estimator_name = f"ScikitLearn - {model.__class__.__name__}"  # Nombre descriptivo
-        mlflow.sklearn.autolog(True)
+        # mlflow.sklearn.autolog(True)  # Removed to keep MLflow run management outside the estimator
 
     def train(self, X, y):
         """
