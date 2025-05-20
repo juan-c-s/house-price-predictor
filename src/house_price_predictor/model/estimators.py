@@ -1,14 +1,8 @@
 import numpy as np
 from sklearn.base import BaseEstimator
-from sklearn.metrics import r2_score, mean_squared_error, accuracy_score, precision_score, recall_score, f1_score, max_error,root_mean_squared_error, mean_absolute_percentage_error
-import tensorflow as tf
-from tensorflow import keras
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset
+import numpy as np
+import mlflow
 
-# Clase abstracta Estimator (Strategy)
 class Estimator:
     """
     Clase abstracta que define la interfaz para los estimadores.
@@ -90,6 +84,7 @@ class ScikitLearnEstimator(Estimator):
         super().__init__(*args, **kwargs)
         self.model = model
         self.estimator_name = f"ScikitLearn - {model.__class__.__name__}"  # Nombre descriptivo
+        mlflow.sklearn.autolog(True)
 
     def train(self, X, y):
         """
