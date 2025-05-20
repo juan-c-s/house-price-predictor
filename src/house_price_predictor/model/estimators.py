@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.base import BaseEstimator
-import numpy as np
+from sklearn.metrics import r2_score, mean_squared_error, accuracy_score, precision_score, recall_score, f1_score, max_error,root_mean_squared_error, mean_absolute_percentage_error
 import mlflow
 
 class Estimator:
@@ -107,204 +107,203 @@ class ScikitLearnEstimator(Estimator):
 
 
 # Clase concreta para estimadores de TensorFlow
-class TensorFlowEstimator(Estimator):
-    """
-    Clase que implementa la interfaz Estimator para modelos de TensorFlow.
-    """
-    def __init__(self, model: tf.keras.Model, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.model = model
-        self.estimator_name = f"TensorFlow - {model.__class__.__name__}"
-        self.history = None
-
-    def train(self, X, y, epochs=10, batch_size=32, validation_data=None):
-        """
-        Entrena el modelo de TensorFlow.
-        """
-        print(f"Entrenando modelo de TensorFlow: {self.estimator_name}")
-        if not isinstance(X, np.ndarray):
-            X = np.array(X)
-        if not isinstance(y, np.ndarray):
-            y = np.array(y)
-        self.history = self.model.fit(X, y, epochs=epochs, batch_size=batch_size, validation_data=validation_data, verbose=0)
-
-    def predict(self, X):
-        """
-        Realiza predicciones con el modelo de TensorFlow.
-        """
-        if not isinstance(X, np.ndarray):
-            X = np.array(X)
-        predictions = self.model.predict(X)
-        if predictions.ndim > 1 and predictions.shape[1] > 1:
-            return np.argmax(predictions, axis=1)
-        elif predictions.shape[1] == 1:
-            return (predictions > 0.5).astype(int)
-        else:
-            return predictions
-
-    def evaluate(self, y_true, y_pred):
-        """
-        Evalúa el modelo de TensorFlow.
-        """
-        return super().evaluate(y_true, y_pred)
-
-    def get_history(self):
-        return self.history
+# class TensorFlowEstimator(Estimator):
+#     """
+#     Clase que implementa la interfaz Estimator para modelos de TensorFlow.
+#     """
+#     def __init__(self, model: tf.keras.Model, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.model = model
+#         self.estimator_name = f"TensorFlow - {model.__class__.__name__}"
+#         self.history = None
+#
+#     def train(self, X, y, epochs=10, batch_size=32, validation_data=None):
+#         """
+#         Entrena el modelo de TensorFlow.
+#         """
+#         print(f"Entrenando modelo de TensorFlow: {self.estimator_name}")
+#         if not isinstance(X, np.ndarray):
+#             X = np.array(X)
+#         if not isinstance(y, np.ndarray):
+#             y = np.array(y)
+#         self.history = self.model.fit(X, y, epochs=epochs, batch_size=batch_size, validation_data=validation_data, verbose=0)
+#
+#     def predict(self, X):
+#         """
+#         Realiza predicciones con el modelo de TensorFlow.
+#         """
+#         if not isinstance(X, np.ndarray):
+#             X = np.array(X)
+#         predictions = self.model.predict(X)
+#         if predictions.ndim > 1 and predictions.shape[1] > 1:
+#             return np.argmax(predictions, axis=1)
+#         elif predictions.shape[1] == 1:
+#             return (predictions > 0.5).astype(int)
+#         else:
+#             return predictions
+#
+#     def evaluate(self, y_true, y_pred):
+#         """
+#         Evalúa el modelo de TensorFlow.
+#         """
+#         return super().evaluate(y_true, y_pred)
+#
+#     def get_history(self):
+#         return self.history
 
 
 # Clase concreta para estimadores de Keras
-class KerasEstimator(Estimator):
-    """
-    Clase que implementa la interfaz Estimator para modelos de Keras.
-    """
-    def __init__(self, model: keras.Model, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.model = model
-        self.estimator_name = f"Keras - {model.__class__.__name__}"
-        self.history = None
-
-    def train(self, X, y, epochs=10, batch_size=32, validation_data=None):
-        """
-        Entrena el modelo de Keras.
-        """
-        print(f"Entrenando modelo de Keras: {self.estimator_name}")
-        if not isinstance(X, np.ndarray):
-            X = np.array(X)
-        if not isinstance(y, np.ndarray):
-            y = np.array(y)
-        self.history = self.model.fit(X, y, epochs=epochs, batch_size=batch_size, validation_data=validation_data, verbose=0)
-
-    def predict(self, X):
-        """
-        Realiza predicciones con el modelo de Keras.
-        """
-        if not isinstance(X, np.ndarray):
-            X = np.array(X)
-        predictions = self.model.predict(X)
-        if predictions.ndim > 1 and predictions.shape[1] > 1:
-            return np.argmax(predictions, axis=1)
-        elif predictions.shape[1] == 1:
-            return (predictions > 0.5).astype(int)
-        else:
-            return predictions
-
-    def evaluate(self, y_true, y_pred):
-        """
-        Evalúa el modelo de Keras.
-        """
-        return super().evaluate(y_true, y_pred)
-
-    def get_history(self):
-        """
-        Devuelve el historial de entrenamiento
-        """
-        return self.history
+# class KerasEstimator(Estimator):
+#     """
+#     Clase que implementa la interfaz Estimator para modelos de Keras.
+#     """
+#     def __init__(self, model: keras.Model, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.model = model
+#         self.estimator_name = f"Keras - {model.__class__.__name__}"
+#         self.history = None
+#
+#     def train(self, X, y, epochs=10, batch_size=32, validation_data=None):
+#         """
+#         Entrena el modelo de Keras.
+#         """
+#         print(f"Entrenando modelo de Keras: {self.estimator_name}")
+#         if not isinstance(X, np.ndarray):
+#             X = np.array(X)
+#         if not isinstance(y, np.ndarray):
+#             y = np.array(y)
+#         self.history = self.model.fit(X, y, epochs=epochs, batch_size=batch_size, validation_data=validation_data, verbose=0)
+#
+#     def predict(self, X):
+#         """
+#         Realiza predicciones con el modelo de Keras.
+#         """
+#         if not isinstance(X, np.ndarray):
+#             X = np.array(X)
+#         predictions = self.model.predict(X)
+#         if predictions.ndim > 1 and predictions.shape[1] > 1:
+#             return np.argmax(predictions, axis=1)
+#         elif predictions.shape[1] == 1:
+#             return (predictions > 0.5).astype(int)
+#         else:
+#             return predictions
+#
+#     def evaluate(self, y_true, y_pred):
+#         """
+#         Evalúa el modelo de Keras.
+#         """
+#         return super().evaluate(y_true, y_pred)
+#
+#     def get_history(self):
+#         """
+#         Devuelve el historial de entrenamiento
+#         """
+#         return self.history
 
 
 
 # Clase concreta para estimadores de PyTorch
-class PyTorchEstimator(Estimator):
-    """
-    Clase que implementa la interfaz Estimator para modelos de PyTorch.
-    """
-    def __init__(self, model: nn.Module, criterion, optimizer, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.model = model
-        self.criterion = criterion
-        self.optimizer = optimizer
-        self.estimator_name = f"PyTorch - {model.__class__.__name__}"
-        self.history = {'loss': [], 'val_loss': []}  # Para almacenar el historial de entrenamiento
-
-    def train(self, X, y, epochs=10, batch_size=32, validation_data=None):
-        """
-        Entrena el modelo de PyTorch.
-        """
-        print(f"Entrenando modelo de PyTorch: {self.estimator_name}")
-        # Convertir datos a tensores de PyTorch
-        if not isinstance(X, torch.Tensor):
-            X = torch.tensor(X, dtype=torch.float32)
-        if not isinstance(y, torch.Tensor):
-            y = torch.tensor(y, dtype=torch.float32)
-            if y.ndim == 1:
-                y = y.unsqueeze(1)  # Asegurar que y tenga la forma (n_samples, 1) para regresión
-
-        # Crear DataLoaders
-        train_dataset = TensorDataset(X, y)
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-
-        if validation_data:
-            X_val, y_val = validation_data
-            if not isinstance(X_val, torch.Tensor):
-                X_val = torch.tensor(X_val, dtype=torch.float32)
-            if not isinstance(y_val, torch.Tensor):
-                y_val = torch.tensor(y_val, dtype=torch.float32)
-                if y_val.ndim == 1:
-                    y_val = y_val.unsqueeze(1)
-            val_dataset = TensorDataset(X_val, y_val)
-            val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-        
-        self.model.train()  # Establecer el modelo en modo de entrenamiento
-
-        for epoch in range(epochs):
-            running_loss = 0.0
-            for i, data in enumerate(train_loader, 0):
-                inputs, labels = data
-                self.optimizer.zero_grad()  # Vaciar los gradientes
-                outputs = self.model(inputs)  # Propagación hacia adelante
-                loss = self.criterion(outputs, labels)  # Calcular la pérdida
-                loss.backward()  # Propagación hacia atrás
-                self.optimizer.step()  # Optimizar
-                running_loss += loss.item()
-
-            epoch_loss = running_loss / len(train_loader)
-            self.history['loss'].append(epoch_loss)
-
-            if validation_data:
-                val_loss = 0.0
-                self.model.eval()  # Establecer el modelo en modo de evaluación
-                with torch.no_grad():
-                    for data in val_loader:
-                        inputs, labels = data
-                        outputs = self.model(inputs)
-                        loss = self.criterion(outputs, labels)
-                        val_loss += loss.item()
-                epoch_val_loss = val_loss / len(val_loader)
-                self.history['val_loss'].append(epoch_val_loss)
-                self.model.train() # poner de nuevo en modo train
-                print(f'Epoch {epoch + 1}, Loss: {epoch_loss:.4f}, Validation Loss: {epoch_val_loss:.4f}')
-            else:
-                print(f'Epoch {epoch + 1}, Loss: {epoch_loss:.4f}')
-        
-
-    def predict(self, X):
-        """
-        Realiza predicciones con el modelo de PyTorch.
-        """
-        if not isinstance(X, torch.Tensor):
-            X = torch.tensor(X, dtype=torch.float32)
-        self.model.eval()  # Establecer el modelo en modo de evaluación para la inferencia
-        with torch.no_grad():  # Desactivar el cálculo de gradientes
-            predictions = self.model(X)
-        
-        # Convertir la salida a un array de NumPy
-        predictions = predictions.numpy()
-        
-        if predictions.ndim > 1 and predictions.shape[1] > 1:
-            return np.argmax(predictions, axis=1)
-        elif predictions.shape[1] == 1:
-             return (predictions > 0.5).astype(int)
-        else:
-            return predictions
-
-    def evaluate(self, y_true, y_pred):
-        """
-        Evalúa el modelo de PyTorch.
-        """
-        return super().evaluate(y_true, y_pred)
-
-    def get_history(self):
-        """
-        Devuelve el historial de entrenamiento del modelo.
-        """
-        return self.history
-
+# class PyTorchEstimator(Estimator):
+#     """
+#     Clase que implementa la interfaz Estimator para modelos de PyTorch.
+#     """
+#     def __init__(self, model: nn.Module, criterion, optimizer, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.model = model
+#         self.criterion = criterion
+#         self.optimizer = optimizer
+#         self.estimator_name = f"PyTorch - {model.__class__.__name__}"
+#         self.history = {'loss': [], 'val_loss': []}  # Para almacenar el historial de entrenamiento
+#
+#     def train(self, X, y, epochs=10, batch_size=32, validation_data=None):
+#         """
+#         Entrena el modelo de PyTorch.
+#         """
+#         print(f"Entrenando modelo de PyTorch: {self.estimator_name}")
+#         # Convertir datos a tensores de PyTorch
+#         if not isinstance(X, torch.Tensor):
+#             X = torch.tensor(X, dtype=torch.float32)
+#         if not isinstance(y, torch.Tensor):
+#             y = torch.tensor(y, dtype=torch.float32)
+#             if y.ndim == 1:
+#                 y = y.unsqueeze(1)  # Asegurar que y tenga la forma (n_samples, 1) para regresión
+#
+#         # Crear DataLoaders
+#         train_dataset = TensorDataset(X, y)
+#         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+#
+#         if validation_data:
+#             X_val, y_val = validation_data
+#             if not isinstance(X_val, torch.Tensor):
+#                 X_val = torch.tensor(X_val, dtype=torch.float32)
+#             if not isinstance(y_val, torch.Tensor):
+#                 y_val = torch.tensor(y_val, dtype=torch.float32)
+#                 if y_val.ndim == 1:
+#                     y_val = y_val.unsqueeze(1)
+#             val_dataset = TensorDataset(X_val, y_val)
+#             val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+#        
+#         self.model.train()  # Establecer el modelo en modo de entrenamiento
+#
+#         for epoch in range(epochs):
+#             running_loss = 0.0
+#             for i, data in enumerate(train_loader, 0):
+#                 inputs, labels = data
+#                 self.optimizer.zero_grad()  # Vaciar los gradientes
+#                 outputs = self.model(inputs)  # Propagación hacia adelante
+#                 loss = self.criterion(outputs, labels)  # Calcular la pérdida
+#                 loss.backward()  # Propagación hacia atrás
+#                 self.optimizer.step()  # Optimizar
+#                 running_loss += loss.item()
+#
+#             epoch_loss = running_loss / len(train_loader)
+#             self.history['loss'].append(epoch_loss)
+#
+#             if validation_data:
+#                 val_loss = 0.0
+#                 self.model.eval()  # Establecer el modelo en modo de evaluación
+#                 with torch.no_grad():
+#                     for data in val_loader:
+#                         inputs, labels = data
+#                         outputs = self.model(inputs)
+#                         loss = self.criterion(outputs, labels)
+#                         val_loss += loss.item()
+#                 epoch_val_loss = val_loss / len(val_loader)
+#                 self.history['val_loss'].append(epoch_val_loss)
+#                 self.model.train() # poner de nuevo en modo train
+#                 print(f'Epoch {epoch + 1}, Loss: {epoch_loss:.4f}, Validation Loss: {epoch_val_loss:.4f}')
+#             else:
+#                 print(f'Epoch {epoch + 1}, Loss: {epoch_loss:.4f}')
+#        
+#
+#     def predict(self, X):
+#         """
+#         Realiza predicciones con el modelo de PyTorch.
+#         """
+#         if not isinstance(X, torch.Tensor):
+#             X = torch.tensor(X, dtype=torch.float32)
+#         self.model.eval()  # Establecer el modelo en modo de evaluación para la inferencia
+#         with torch.no_grad():  # Desactivar el cálculo de gradientes
+#             predictions = self.model(X)
+#        
+#         # Convertir la salida a un array de NumPy
+#         predictions = predictions.numpy()
+#        
+#         if predictions.ndim > 1 and predictions.shape[1] > 1:
+#             return np.argmax(predictions, axis=1)
+#         elif predictions.shape[1] == 1:
+#              return (predictions > 0.5).astype(int)
+#         else:
+#             return predictions
+#
+#     def evaluate(self, y_true, y_pred):
+#         """
+#         Evalúa el modelo de PyTorch.
+#         """
+#         return super().evaluate(y_true, y_pred)
+#
+#     def get_history(self):
+#         """
+#         Devuelve el historial de entrenamiento del modelo.
+#         """
+#         return self.history
