@@ -1,0 +1,39 @@
+artifact_path: model
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.9
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.6.1
+is_signature_from_type_hint: false
+mlflow_version: 2.22.0
+model_size_bytes: 3149
+model_uuid: ce6c92de3bcb47c5b7442bb8b21ef1da
+prompts: null
+run_id: 146b07d802544d53a3a5d66e95f2cccf
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "double", "name": "area", "required": true}, {"type": "double",
+    "name": "bathrooms", "required": true}, {"type": "double", "name": "stories",
+    "required": true}, {"type": "double", "name": "parking", "required": true}, {"type":
+    "double", "name": "bedrooms", "required": true}, {"type": "double", "name": "airconditioning",
+    "required": true}, {"type": "double", "name": "prefarea", "required": true}, {"type":
+    "double", "name": "furnishingstatus_furnished", "required": true}, {"type": "double",
+    "name": "furnishingstatus_semi-furnished", "required": true}, {"type": "double",
+    "name": "furnishingstatus_unfurnished", "required": true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float64", "shape": [-1]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-05-18 00:16:19.426214'
