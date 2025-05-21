@@ -45,6 +45,7 @@ class Estimator:
                 "recall": recall,
                 "f1": f1,
             }
+            """ 
         elif y_true.dtype in ['int64', 'int32', 'int8', 'bool']:
             # Manejar el caso de clasificación binaria
             accuracy = accuracy_score(y_true, y_pred)
@@ -57,6 +58,7 @@ class Estimator:
                 "recall": recall,
                 "f1": f1,
             }
+            """
         else:
             # Manejar el caso de regresión
             r2 = r2_score(y_true, y_pred)
