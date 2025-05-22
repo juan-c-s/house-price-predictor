@@ -27,7 +27,7 @@ class Estimator:
         """
         raise NotImplementedError("El método predict debe ser implementado por la subclase")
 
-    def evaluate(self, y_true, y_pred):
+    def evaluate(self, y_true, y_pred) -> dict:
         """
         Evalúa el rendimiento del modelo comparando las predicciones con los valores reales.
         Calcula varias métricas de evaluación relevantes.
@@ -66,6 +66,7 @@ class Estimator:
             rmse = root_mean_squared_error(y_true,y_pred)
             max_err = max_error(y_true, y_pred)
             mape = mean_absolute_percentage_error(y_true, y_pred)
+            
             return {
                 "r2": r2,
                 "mse": mse,
@@ -86,7 +87,7 @@ class ScikitLearnEstimator(Estimator):
         super().__init__(*args, **kwargs)
         self.model = model
         self.estimator_name = f"ScikitLearn - {model.__class__.__name__}"  # Nombre descriptivo
-        mlflow.sklearn.autolog(True)
+        #mlflow.sklearn.autolog(True)
 
     def train(self, X, y):
         """
