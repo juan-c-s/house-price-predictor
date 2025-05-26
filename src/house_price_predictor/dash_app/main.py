@@ -3,17 +3,13 @@ from dash import html, dcc, dash_table
 import plotly.express as px
 import pandas as pd
 import numpy as np
+from house_price_predictor.dash_app.read_s3_file import read_from_s3
+from house_price_predictor.dash_app.constants import HOUSING_S3_BUCKET, HOUSING_S3_KEY_REFINED
 
 # Create sample data (you can replace this with your actual data)
 np.random.seed(42)
-data = {
-    'prediction': np.random.normal(200000, 50000, 100),
-    'actual': np.random.normal(200000, 50000, 100),
-}
-df = pd.DataFrame(data)
-df['error'] = df['prediction'] - df['actual']
-df['absolute_error'] = abs(df['error'])
-df['percentage_error'] = (df['error'] / df['actual']) * 100
+
+df = read_from_s3(HOUSING_S3_BUCKET, HOUSING_S3_KEY_REFINED, file_type='parquet')
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
