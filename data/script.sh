@@ -1,1 +1,1 @@
-sudo python3 -m pip install numpy boto3 nltk scipy scikit-learn pandas
+sudo python3 -m pip install -r requirements.txt
