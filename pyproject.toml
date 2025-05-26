@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "matplotlib>=3.10.3",
+    "mlflow>=2.22.0",
     "pandas>=2.2.3",
     "scikit-learn>=1.6.1",
     "seaborn>=0.13.2",

@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/994727308414446137/23cd4475f4d049a7bcbeda967dbdd91c/artifacts
+end_time: 1747525683650
+entry_point_name: ''
+experiment_id: '994727308414446137'
+lifecycle_stage: active
+run_id: 23cd4475f4d049a7bcbeda967dbdd91c
+run_name: resilient-rook-159
+run_uuid: 23cd4475f4d049a7bcbeda967dbdd91c
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747525679879
+status: 3
+tags: []
+user_id: juancamilosalazar

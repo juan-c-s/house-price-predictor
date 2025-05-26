@@ -1,0 +1,14 @@
+digest: 27f65cef
+name: dataset
+profile: '{"num_rows": 109, "num_elements": 1090}'
+schema: '{"mlflow_colspec": [{"type": "double", "name": "area", "required": true},
+  {"type": "double", "name": "bathrooms", "required": true}, {"type": "double", "name":
+  "stories", "required": true}, {"type": "double", "name": "parking", "required":
+  true}, {"type": "double", "name": "bedrooms", "required": true}, {"type": "double",
+  "name": "airconditioning", "required": true}, {"type": "double", "name": "prefarea",
+  "required": true}, {"type": "double", "name": "furnishingstatus_furnished", "required":
+  true}, {"type": "double", "name": "furnishingstatus_semi-furnished", "required":
+  true}, {"type": "double", "name": "furnishingstatus_unfurnished", "required": true}]}'
+source: '{"tags": {"mlflow.user": "juancamilosalazar", "mlflow.source.name": "/Users/juancamilosalazar/Documents/GitHub/house-price-predictor/.venv/lib/python3.12/site-packages/ipykernel_launcher.py",
+  "mlflow.source.type": "LOCAL"}}'
+source_type: code
