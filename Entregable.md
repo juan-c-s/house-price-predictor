@@ -6,10 +6,10 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
 ## Descripción General de la Arquitectura
 
 ### Pipeline de Datos
-1. **Ingesta de Datos**
+1. **Almacenamiento de Datos**
    - Ingesta de datos sin procesar en la zona raw de S3
    - Validación y limpieza de datos en cluster EMR
-   - Datos procesados almacenados en zonas trusted/refined
+
 
 2. **Capa de Procesamiento**
    - Cluster EMR con Spark para procesamiento distribuido
@@ -90,9 +90,9 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
 
 ## Implementación AWS
 
-## **Diagrama de Arquitectura**
+### **Diagrama de Arquitectura**
 
-A continuación, se muestra un diagrama de la arquitectura:  
+A continuación, se muestra un diagrama de la arquitectura de acuerdo al ciclo de vida de los datos. Principalmente se nota el Almacenamiento, Procesamiento (Tratamiento Y Analisis), y Consumo:
 
 ```mermaid
 graph TD  
@@ -113,9 +113,9 @@ graph TD
         EMRPredict["Paso 2: Predicción de Precios (Spark)"]  
     end
 
-    subgraph "Catálogo y Consulta"  
+    subgraph "Catálogo y Consulta (Procesamiento)"  
         GlueCatalog["AWS Glue Data Catalog"]  
-        Athena["Amazon Athena"]  
+        Athena["Amazon Athena"]
     end
 
     subgraph "Consumo"  
@@ -145,7 +145,7 @@ graph TD
 
 ```
 
-### Arquitectura del Data Lake en S3
+### Arquitectura del Data Lake en S3:
 - **Zona Raw**: Ingesta inicial de datos
   - Archivos CSV/Parquet originales
   - Almacenamiento de datos sin procesar
@@ -183,7 +183,6 @@ En esta estructura de almacenamiento hacemos uso de estas zonas, y permitimos qu
 ## Implementación en AWS
 
 
-
 1. **Configuración de Buckets S3 y Zonas de Datos**
    - Configuración de zonas Raw, Trusted y Refined
    - Scripts de bootstrap para configuración del cluster
@@ -206,21 +205,10 @@ En esta estructura de almacenamiento hacemos uso de estas zonas, y permitimos qu
     sudo python3 \-m pip install numpy  
     \# Otras bibliotecas pueden ser instaladas aquí si es necesario
 ```
-4. **Entorno de Desarrollo PySpark**
-   - Integración con Jupyter notebook
-   - Procesamiento interactivo de datos
-![Notebook EMR Jupyter](evidence/jupyter.jpg)
-
-5. **Ejecución del Pipeline de Datos**
-   - Operaciones de escritura en S3
-   - Monitoreo y depuración del pipeline
-![SQL](https://github.com/user-attachments/assets/92c81ee9-a476-47d2-8e65-ab5146570fdc)
-
 
 Se usan EMR_EC2_DefaultRole y vockey.pem como atributos de EC2. Y se configuran los grupos de seguridad para permitir entrar a las aplicaciones como JupyterHub que está en 9443. 
 
-Un comando de ejemplo para lanzar el cluster:
-
+Desde la AWS CLI el comando que lanza el cluster sería algo así:
 ```sh
 aws emr create-cluster \
  --name "Mi clúster" \
@@ -238,10 +226,27 @@ aws emr create-cluster \
  --region "us-east-1"
 ```
 
+Al lanzar el cluster se puede tardar como 15 minutos y luego por aplicaciones uno se puede dirigir a jupyterhub, entrar con el username jovyan y contraseña jupyter.
+4. **Entorno de Desarrollo PySpark**
+   - Integración con Jupyter notebook
+   - Procesamiento interactivo de datos
+![Notebook EMR Jupyter](evidence/jupyter.jpg)
+
+5. **Ejecución del Pipeline de Datos**
+   - Operaciones de escritura en S3
+   - Monitoreo y depuración del pipeline
+![SQL](https://github.com/user-attachments/assets/92c81ee9-a476-47d2-8e65-ab5146570fdc)
+
+
+
+
 
 6. **Integración de Athena (Data Warehouse)**
     - Configuración de catalogación automática de datos con **AWS Glue** para entender la estructura de datos
     - Listo para futuras consultas SQL y reportes
+    - Los analistas de datos o científicos de datos pueden ejecutar consultas SQL ad-hoc directamente sobre los datos en S3 utilizando Amazon Athena.
+    - Athena utiliza el Glue Data Catalog para obtener el esquema de las tablas y acceder a los datos en las zonas trustedy refined.
+    - Esto es útil para análisis exploratorio, validación de resultados y generación de informes. 
 ![glue](https://github.com/user-attachments/assets/fd9de689-d281-4544-abfb-a538e05f166e)
 ![athena](https://github.com/user-attachments/assets/04c596c7-6b10-44e7-bb8b-fcea5a98f737)
 
