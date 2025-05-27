@@ -159,6 +159,8 @@ graph TD
   - Predicciones del modelo
   - Resultados agregados
 
+En esta estructura de almacenamiento hacemos uso de estas zonas, y permitimos que el housing sea el directorio de donde se pueden leer varios archivos csv con el mismo schema. Esta estructura permite hacer uso de herramientas como Glue o Spark que infieran un schema y adopten un dataframe a partir de varios archivos.
+
 ### Configuración del Cluster EMR
 - **Nodo Master**: Gestión y coordinación del cluster
 - **Nodos Worker**: Procesamiento distribuido
@@ -240,6 +242,8 @@ aws emr create-cluster \
 6. **Integración de Athena (Data Warehouse)**
     - Configuración de catalogación automática de datos con **AWS Glue** para entender la estructura de datos
     - Listo para futuras consultas SQL y reportes
+![glue](https://github.com/user-attachments/assets/fd9de689-d281-4544-abfb-a538e05f166e)
+![athena](https://github.com/user-attachments/assets/04c596c7-6b10-44e7-bb8b-fcea5a98f737)
 
 ## Estructura del Proyecto
 ```
