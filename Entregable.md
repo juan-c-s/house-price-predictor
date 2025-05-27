@@ -15,6 +15,7 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
    - Cluster EMR con Spark para procesamiento distribuido
    - PySpark para transformaciones de datos y entrenamiento de modelos
    - Particionamiento de datos para procesamiento eficiente
+   
 
 3. **Visualización Frontend**
    - Aplicación web Dash para exploración interactiva de datos
@@ -89,6 +90,60 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
 
 ## Implementación AWS
 
+## **Diagrama de Arquitectura**
+
+A continuación, se muestra un diagrama de la arquitectura:  
+
+```mermaid
+graph TD  
+    subgraph "Fuentes de Datos"  
+        DS\[Datos de Casas CSV/DB/API\]  
+    end
+
+    subgraph "Almacenamiento S3"  
+        S3Raw\["S3 Raw Zone (s3://bucket/raw/)"\]  
+        S3Processed\["S3 Processed Zone (s3://bucket/trusted/)"\]  
+        S3Refined\["S3 Refined Zone (s3://bucket/refined/)"\]  
+    end
+
+    subgraph "Procesamiento EMR"  
+        EMRCluster\["Cluster EMR (con Spark & Numpy)"\]  
+        EMRBootstrap\["Bootstrap Action (instala numpy)"\]  
+        EMRPreproc\["Paso 1: Preprocesamiento (Spark)"\]  
+        EMRPredict\["Paso 2: Predicción de Precios (Spark)"\]  
+    end
+
+    subgraph "Catálogo y Consulta"  
+        GlueCatalog\["AWS Glue Data Catalog"\]  
+        Athena\["Amazon Athena"\]  
+    end
+
+    subgraph "Consumo"  
+        EC2App\["Aplicación en EC2"\]  
+    end
+
+    DS \--\> S3Raw;
+
+    S3Raw \-- "Lee datos crudos" \--\> EMRPreproc;  
+    EMRCluster \-- "Ejecuta" \--\> EMRPreproc;  
+    EMRCluster \-- "Ejecuta" \--\> EMRPredict;  
+    EMRBootstrap \-- "Configura" \--\> EMRCluster;
+
+    EMRPreproc \-- "Escribe datos procesados" \--\> S3Processed;  
+    S3Processed \-- "Lee datos procesados" \--\> EMRPredict;  
+    EMRPredict \-- "Escribe predicciones" \--\> S3Refined;
+
+    S3Processed \-- "Crawler" \--\> GlueCatalog;  
+    S3Refined \-- "Crawler" \--\> GlueCatalog;
+
+    GlueCatalog \-- "Metadatos" \--\> Athena;  
+    S3Refined \-- "Datos para Query" \--\> Athena;  
+    Athena \-- "Consultas Ad-hoc" \--\> UsuariosAnalistas\["Analistas/Científicos de Datos"\];
+
+    S3Refined \-- "Lee datos predichos" \--\> EC2App;  
+    EC2App \-- "Presenta/Usa predicciones" \--\> UsuariosFinales\["Usuarios Finales de la Aplicación"\];
+```
+
 ### Arquitectura del Data Lake en S3
 - **Zona Raw**: Ingesta inicial de datos
   - Archivos CSV/Parquet originales
@@ -122,7 +177,9 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
   - Consulta directa a zona refined de S3
   ![Aplicación Dash](evidence/Dash-app.jpg)
 
-## Evidencia de Implementación AWS
+## Implementación en AWS
+
+
 
 1. **Configuración de Buckets S3 y Zonas de Datos**
    - Configuración de zonas Raw, Trusted y Refined
@@ -138,7 +195,14 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
    - Nodos master y worker
    - Capacidad de procesamiento distribuido
 ![Instancias EC2](evidence/ec2-instances.jpg)
+  * Se configura un cluster de EMR con las instancias y el software necesario (e.g., Spark, Hadoop).  
+  * **Bootstrap Action:** Durante el aprovisionamiento del cluster, se ejecuta una acción de arranque (Bootstrap Action) para instalar bibliotecas adicionales requeridas por los trabajos de procesamiento. Específicamente, se instala numpy en todos los nodos del cluster:  
 
+```sh
+    \#\!/bin/bash  
+    sudo python3 \-m pip install numpy  
+    \# Otras bibliotecas pueden ser instaladas aquí si es necesario
+```
 4. **Entorno de Desarrollo PySpark**
    - Integración con Jupyter notebook
    - Procesamiento interactivo de datos
@@ -148,6 +212,28 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
    - Operaciones de escritura en S3
    - Monitoreo y depuración del pipeline
 ![Error de escritura en bucket](evidence/jupyter2.jpg)
+
+Se usan EMR_EC2_DefaultRole y vockey.pem como atributos de EC2. Y se configuran los grupos de seguridad para permitir entrar a las aplicaciones como JupyterHub que está en 9443. 
+
+Un comando de ejemplo para lanzar el cluster:
+
+```sh
+aws emr create-cluster \
+ --name "Mi clúster" \
+ --log-uri "s3://aws-logs-058264418454-us-east-1/elasticmapreduce" \
+ --release-label "emr-7.8.0" \
+ --service-role "arn:aws:iam::058264418454:role/EMR_DefaultRole" \
+ --unhealthy-node-replacement \
+ --ec2-attributes '{"InstanceProfile":"EMR_EC2_DefaultRole","EmrManagedMasterSecurityGroup":"sg-0441ec0cbd8f6b942","EmrManagedSlaveSecurityGroup":"sg-0eed5d1e2afbde057","KeyName":"vockey","AdditionalMasterSecurityGroups":[],"AdditionalSlaveSecurityGroups":[],"SubnetIds":["subnet-02f0a55ab5f3146d3"]}' \
+ --applications Name=HCatalog Name=Hadoop Name=Hive Name=Hue Name=JupyterEnterpriseGateway Name=JupyterHub Name=Livy Name=Pig Name=Spark Name=Tez Name=Zeppelin Name=ZooKeeper \
+ --configurations '[{"Classification":"jupyter-s3-conf","Properties":{"s3.persistence.bucket":"javillarrmb","s3.persistence.enabled":"true"}},{"Classification":"spark-hive-site","Properties":{"hive.metastore.client.factory.class":"com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"}}]' \
+ --instance-groups '[{"InstanceCount":1,"InstanceGroupType":"CORE","Name":"Central","InstanceType":"m5.xlarge","EbsConfiguration":{"EbsBlockDeviceConfigs":[{"VolumeSpecification":{"VolumeType":"gp2","SizeInGB":32},"VolumesPerInstance":2}]}},{"InstanceCount":1,"InstanceGroupType":"TASK","Name":"Tarea - 1","InstanceType":"m5.xlarge","EbsConfiguration":{"EbsBlockDeviceConfigs":[{"VolumeSpecification":{"VolumeType":"gp2","SizeInGB":32},"VolumesPerInstance":2}]}},{"InstanceCount":1,"InstanceGroupType":"MASTER","Name":"Principal","InstanceType":"m5.xlarge","EbsConfiguration":{"EbsBlockDeviceConfigs":[{"VolumeSpecification":{"VolumeType":"gp2","SizeInGB":32},"VolumesPerInstance":2}]}}]' \
+ --bootstrap-actions '[{"Args":[],"Name":"numpy","Path":"s3://javillarrmb/scripts/bs.sh"}]' \
+ --scale-down-behavior "TERMINATE_AT_TASK_COMPLETION" \
+ --auto-termination-policy '{"IdleTimeout":3600}' \
+ --region "us-east-1"
+```
+
 
 6. **Integración de Athena (Data Warehouse)**
     - Configuración de catalogación automática de datos con **AWS Glue** para entender la estructura de datos
