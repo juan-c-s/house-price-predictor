@@ -97,51 +97,52 @@ A continuación, se muestra un diagrama de la arquitectura:
 ```mermaid
 graph TD  
     subgraph "Fuentes de Datos"  
-        DS\[Datos de Casas CSV/DB/API\]  
+        DS["Datos de Casas (CSV/DB/API)"]  
     end
 
     subgraph "Almacenamiento S3"  
-        S3Raw\["S3 Raw Zone (s3://bucket/raw/)"\]  
-        S3Processed\["S3 Processed Zone (s3://bucket/trusted/)"\]  
-        S3Refined\["S3 Refined Zone (s3://bucket/refined/)"\]  
+        S3Raw["S3 Raw Zone"]  
+        S3Processed["S3 Processed Zone"]  
+        S3Refined["S3 Refined Zone"]  
     end
 
     subgraph "Procesamiento EMR"  
-        EMRCluster\["Cluster EMR (con Spark & Numpy)"\]  
-        EMRBootstrap\["Bootstrap Action (instala numpy)"\]  
-        EMRPreproc\["Paso 1: Preprocesamiento (Spark)"\]  
-        EMRPredict\["Paso 2: Predicción de Precios (Spark)"\]  
+        EMRCluster["Cluster EMR (Spark & Numpy)"]  
+        EMRBootstrap["Bootstrap Action (instala numpy)"]  
+        EMRPreproc["Paso 1: Preprocesamiento (Spark)"]  
+        EMRPredict["Paso 2: Predicción de Precios (Spark)"]  
     end
 
     subgraph "Catálogo y Consulta"  
-        GlueCatalog\["AWS Glue Data Catalog"\]  
-        Athena\["Amazon Athena"\]  
+        GlueCatalog["AWS Glue Data Catalog"]  
+        Athena["Amazon Athena"]  
     end
 
     subgraph "Consumo"  
-        EC2App\["Aplicación en EC2"\]  
+        EC2App["Aplicación en EC2"]  
     end
 
-    DS \--\> S3Raw;
+    DS --> S3Raw
 
-    S3Raw \-- "Lee datos crudos" \--\> EMRPreproc;  
-    EMRCluster \-- "Ejecuta" \--\> EMRPreproc;  
-    EMRCluster \-- "Ejecuta" \--\> EMRPredict;  
-    EMRBootstrap \-- "Configura" \--\> EMRCluster;
+    S3Raw -->|Lee datos crudos| EMRPreproc  
+    EMRCluster -->|Ejecuta| EMRPreproc  
+    EMRCluster -->|Ejecuta| EMRPredict  
+    EMRBootstrap -->|Configura| EMRCluster
 
-    EMRPreproc \-- "Escribe datos procesados" \--\> S3Processed;  
-    S3Processed \-- "Lee datos procesados" \--\> EMRPredict;  
-    EMRPredict \-- "Escribe predicciones" \--\> S3Refined;
+    EMRPreproc -->|Escribe datos procesados| S3Processed  
+    S3Processed -->|Lee datos procesados| EMRPredict  
+    EMRPredict -->|Escribe predicciones| S3Refined
 
-    S3Processed \-- "Crawler" \--\> GlueCatalog;  
-    S3Refined \-- "Crawler" \--\> GlueCatalog;
+    S3Processed -->|Crawler| GlueCatalog  
+    S3Refined -->|Crawler| GlueCatalog
 
-    GlueCatalog \-- "Metadatos" \--\> Athena;  
-    S3Refined \-- "Datos para Query" \--\> Athena;  
-    Athena \-- "Consultas Ad-hoc" \--\> UsuariosAnalistas\["Analistas/Científicos de Datos"\];
+    GlueCatalog -->|Metadatos| Athena  
+    S3Refined -->|Datos para Query| Athena  
+    Athena -->|Consultas Ad-hoc| Analistas["Analistas/Científicos de Datos"]
 
-    S3Refined \-- "Lee datos predichos" \--\> EC2App;  
-    EC2App \-- "Presenta/Usa predicciones" \--\> UsuariosFinales\["Usuarios Finales de la Aplicación"\];
+    S3Refined -->|Lee datos predichos| EC2App  
+    EC2App -->|Presenta/Usa predicciones| Usuarios["Usuarios Finales de la Aplicación"]
+
 ```
 
 ### Arquitectura del Data Lake en S3
