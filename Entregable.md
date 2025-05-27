@@ -6,15 +6,16 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
 ## Descripción General de la Arquitectura
 
 ### Pipeline de Datos
-1. **Ingesta de Datos**
+1. **Almacenamiento de Datos**
    - Ingesta de datos sin procesar en la zona raw de S3
    - Validación y limpieza de datos en cluster EMR
-   - Datos procesados almacenados en zonas trusted/refined
+
 
 2. **Capa de Procesamiento**
    - Cluster EMR con Spark para procesamiento distribuido
    - PySpark para transformaciones de datos y entrenamiento de modelos
    - Particionamiento de datos para procesamiento eficiente
+   
 
 3. **Visualización Frontend**
    - Aplicación web Dash para exploración interactiva de datos
@@ -89,7 +90,62 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
 
 ## Implementación AWS
 
-### Arquitectura del Data Lake en S3
+### **Diagrama de Arquitectura**
+
+A continuación, se muestra un diagrama de la arquitectura de acuerdo al ciclo de vida de los datos. Principalmente se nota el Almacenamiento, Procesamiento (Tratamiento Y Analisis), y Consumo:
+
+```mermaid
+graph TD  
+    subgraph "Fuentes de Datos"  
+        DS["Datos de Casas (CSV/DB/API)"]  
+    end
+
+    subgraph "Almacenamiento S3"  
+        S3Raw["S3 Raw Zone"]  
+        S3Processed["S3 Processed Zone"]  
+        S3Refined["S3 Refined Zone"]  
+    end
+
+    subgraph "Procesamiento EMR"  
+        EMRCluster["Cluster EMR (Spark & Numpy)"]  
+        EMRBootstrap["Bootstrap Action (instala numpy)"]  
+        EMRPreproc["Paso 1: Preprocesamiento (Spark)"]  
+        EMRPredict["Paso 2: Predicción de Precios (Spark)"]  
+    end
+
+    subgraph "Catálogo y Consulta (Procesamiento)"  
+        GlueCatalog["AWS Glue Data Catalog"]  
+        Athena["Amazon Athena"]
+    end
+
+    subgraph "Consumo"  
+        EC2App["Aplicación en EC2"]  
+    end
+
+    DS --> S3Raw
+
+    S3Raw -->|Lee datos crudos| EMRPreproc  
+    EMRCluster -->|Ejecuta| EMRPreproc  
+    EMRCluster -->|Ejecuta| EMRPredict  
+    EMRBootstrap -->|Configura| EMRCluster
+
+    EMRPreproc -->|Escribe datos procesados| S3Processed  
+    S3Processed -->|Lee datos procesados| EMRPredict  
+    EMRPredict -->|Escribe predicciones| S3Refined
+
+    S3Processed -->|Crawler| GlueCatalog  
+    S3Refined -->|Crawler| GlueCatalog
+
+    GlueCatalog -->|Metadatos| Athena  
+    S3Refined -->|Datos para Query| Athena  
+    Athena -->|Consultas Ad-hoc| Analistas["Analistas/Científicos de Datos"]
+
+    S3Refined -->|Lee datos predichos| EC2App  
+    EC2App -->|Presenta/Usa predicciones| Usuarios["Usuarios Finales de la Aplicación"]
+
+```
+
+### Arquitectura del Data Lake en S3:
 - **Zona Raw**: Ingesta inicial de datos
   - Archivos CSV/Parquet originales
   - Almacenamiento de datos sin procesar
@@ -102,6 +158,8 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
   - Características procesadas
   - Predicciones del modelo
   - Resultados agregados
+
+En esta estructura de almacenamiento hacemos uso de estas zonas, y permitimos que el housing sea el directorio de donde se pueden leer varios archivos csv con el mismo schema. Esta estructura permite hacer uso de herramientas como Glue o Spark que infieran un schema y adopten un dataframe a partir de varios archivos.
 
 ### Configuración del Cluster EMR
 - **Nodo Master**: Gestión y coordinación del cluster
@@ -122,7 +180,8 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
   - Consulta directa a zona refined de S3
   ![Aplicación Dash](evidence/Dash-app.jpg)
 
-## Evidencia de Implementación AWS
+## Implementación en AWS
+
 
 1. **Configuración de Buckets S3 y Zonas de Datos**
    - Configuración de zonas Raw, Trusted y Refined
@@ -138,7 +197,36 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
    - Nodos master y worker
    - Capacidad de procesamiento distribuido
 ![Instancias EC2](evidence/ec2-instances.jpg)
+  * Se configura un cluster de EMR con las instancias y el software necesario (e.g., Spark, Hadoop).  
+  * **Bootstrap Action:** Durante el aprovisionamiento del cluster, se ejecuta una acción de arranque (Bootstrap Action) para instalar bibliotecas adicionales requeridas por los trabajos de procesamiento. Específicamente, se instala numpy en todos los nodos del cluster:  
 
+```sh
+    \#\!/bin/bash  
+    sudo python3 \-m pip install numpy  
+    \# Otras bibliotecas pueden ser instaladas aquí si es necesario
+```
+
+Se usan EMR_EC2_DefaultRole y vockey.pem como atributos de EC2. Y se configuran los grupos de seguridad para permitir entrar a las aplicaciones como JupyterHub que está en 9443. 
+
+Desde la AWS CLI el comando que lanza el cluster sería algo así:
+```sh
+aws emr create-cluster \
+ --name "Mi clúster" \
+ --log-uri "s3://aws-logs-058264418454-us-east-1/elasticmapreduce" \
+ --release-label "emr-7.8.0" \
+ --service-role "arn:aws:iam::058264418454:role/EMR_DefaultRole" \
+ --unhealthy-node-replacement \
+ --ec2-attributes '{"InstanceProfile":"EMR_EC2_DefaultRole","EmrManagedMasterSecurityGroup":"sg-0441ec0cbd8f6b942","EmrManagedSlaveSecurityGroup":"sg-0eed5d1e2afbde057","KeyName":"vockey","AdditionalMasterSecurityGroups":[],"AdditionalSlaveSecurityGroups":[],"SubnetIds":["subnet-02f0a55ab5f3146d3"]}' \
+ --applications Name=HCatalog Name=Hadoop Name=Hive Name=Hue Name=JupyterEnterpriseGateway Name=JupyterHub Name=Livy Name=Pig Name=Spark Name=Tez Name=Zeppelin Name=ZooKeeper \
+ --configurations '[{"Classification":"jupyter-s3-conf","Properties":{"s3.persistence.bucket":"javillarrmb","s3.persistence.enabled":"true"}},{"Classification":"spark-hive-site","Properties":{"hive.metastore.client.factory.class":"com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"}}]' \
+ --instance-groups '[{"InstanceCount":1,"InstanceGroupType":"CORE","Name":"Central","InstanceType":"m5.xlarge","EbsConfiguration":{"EbsBlockDeviceConfigs":[{"VolumeSpecification":{"VolumeType":"gp2","SizeInGB":32},"VolumesPerInstance":2}]}},{"InstanceCount":1,"InstanceGroupType":"TASK","Name":"Tarea - 1","InstanceType":"m5.xlarge","EbsConfiguration":{"EbsBlockDeviceConfigs":[{"VolumeSpecification":{"VolumeType":"gp2","SizeInGB":32},"VolumesPerInstance":2}]}},{"InstanceCount":1,"InstanceGroupType":"MASTER","Name":"Principal","InstanceType":"m5.xlarge","EbsConfiguration":{"EbsBlockDeviceConfigs":[{"VolumeSpecification":{"VolumeType":"gp2","SizeInGB":32},"VolumesPerInstance":2}]}}]' \
+ --bootstrap-actions '[{"Args":[],"Name":"numpy","Path":"s3://javillarrmb/scripts/bs.sh"}]' \
+ --scale-down-behavior "TERMINATE_AT_TASK_COMPLETION" \
+ --auto-termination-policy '{"IdleTimeout":3600}' \
+ --region "us-east-1"
+```
+
+Al lanzar el cluster se puede tardar como 15 minutos y luego por aplicaciones uno se puede dirigir a jupyterhub, entrar con el username jovyan y contraseña jupyter.
 4. **Entorno de Desarrollo PySpark**
    - Integración con Jupyter notebook
    - Procesamiento interactivo de datos
@@ -147,11 +235,20 @@ Este proyecto implementa una solución de aprendizaje automático para predecir 
 5. **Ejecución del Pipeline de Datos**
    - Operaciones de escritura en S3
    - Monitoreo y depuración del pipeline
-![Error de escritura en bucket](evidence/jupyter2.jpg)
+![SQL](https://github.com/user-attachments/assets/92c81ee9-a476-47d2-8e65-ab5146570fdc)
+
+
+
+
 
 6. **Integración de Athena (Data Warehouse)**
     - Configuración de catalogación automática de datos con **AWS Glue** para entender la estructura de datos
     - Listo para futuras consultas SQL y reportes
+    - Los analistas de datos o científicos de datos pueden ejecutar consultas SQL ad-hoc directamente sobre los datos en S3 utilizando Amazon Athena.
+    - Athena utiliza el Glue Data Catalog para obtener el esquema de las tablas y acceder a los datos en las zonas trustedy refined.
+    - Esto es útil para análisis exploratorio, validación de resultados y generación de informes. 
+![glue](https://github.com/user-attachments/assets/fd9de689-d281-4544-abfb-a538e05f166e)
+![athena](https://github.com/user-attachments/assets/04c596c7-6b10-44e7-bb8b-fcea5a98f737)
 
 ## Estructura del Proyecto
 ```
