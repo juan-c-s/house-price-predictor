@@ -212,7 +212,8 @@ graph TD
 5. **Ejecución del Pipeline de Datos**
    - Operaciones de escritura en S3
    - Monitoreo y depuración del pipeline
-![Error de escritura en bucket](evidence/jupyter2.jpg)
+![SQL](https://github.com/user-attachments/assets/92c81ee9-a476-47d2-8e65-ab5146570fdc)
+
 
 Se usan EMR_EC2_DefaultRole y vockey.pem como atributos de EC2. Y se configuran los grupos de seguridad para permitir entrar a las aplicaciones como JupyterHub que está en 9443. 
 
