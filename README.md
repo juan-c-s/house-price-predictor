@@ -1,8 +1,74 @@
 # House Price Predictor
-https://github.com/juan-c-s/house-price-predictor
 
-Notion: 
-https://www.notion.so/TODO-1f27e87b1e4880b69eeed353b3fb93ee?pvs=4
+Un sistema de predicción de precios de viviendas utilizando machine learning y AWS.
+
+## Requisitos Previos
+
+- Python 3.12 o superior
+- Credenciales de AWS
+- [uv](https://github.com/astral-sh/uv) para gestión de dependencias (recomendado)
+
+## Configuración del Entorno
+
+1. Clonar el repositorio:
+```bash
+git clone https://github.com/juan-c-s/house-price-predictor
+cd house-price-predictor
+```
+2. Correr cualquier comando con UV, esto te generará el ambiente virtual.
+```bash
+uv run python
+```
+
+## Configuración de Variables de Entorno
+
+Crear un archivo `.env` en la raíz del proyecto basado en `.env.example`:
+
+```env
+# AWS Credentials
+AWS_ACCESS_KEY_ID=tu_access_key_id
+AWS_SECRET_ACCESS_KEY=tu_secret_access_key
+AWS_DEFAULT_REGION=us-east-1
+```
+
+## Estructura del Proyecto
+
+```
+house-price-predictor/
+├── data/                    # Datos locales (si se necesitan)
+├── src/
+│   └── house_price_predictor/
+│       ├── model/          # Implementaciones de modelos ML
+│       └── dash_app/       # Aplicación web Dash
+├── notebooks/              # Notebooks de desarrollo
+└── mlruns/                # Seguimiento de experimentos MLflow
+```
+
+
+## Uso de la Aplicación Dash
+
+La aplicación Dash proporciona una interfaz web para visualizar predicciones y métricas.
+
+### Ejecutar la Aplicación
+
+Antes de ejecutar la aplicación:
+1. Asegúrate de tener el archivo `.env` configurado correctamente (ver sección "Configuración de Variables de Entorno")
+2. Las variables de entorno son necesarias para:
+   - Conexión con AWS S3
+
+1. **Desde la raíz del proyecto** (recomendado):
+```bash
+make dash-app
+```
+
+La aplicación estará disponible en `http://localhost:8050`
+
+La aplicación mostrará:
+- Tabla de métricas de predicción
+
+## Desarrollo
+
+# Notas de Desarrollo
 
 ## EDA (Estadística, fundamentos, Álgebra) jueves Mayo 15
 
@@ -22,68 +88,3 @@ https://www.notion.so/TODO-1f27e87b1e4880b69eeed353b3fb93ee?pvs=4
 3. Interpretación resultados
 4. Benchmark de modelos
 5. cross-validation con los modelos
-
-`Y_pred = model.fit(X,Y)`
-
-`evaluator = Evaluator (precision, f1, recall, auc_score)`
-
-`model.evaluate(Y_pred, evaluator)`
-
-`class Evaluator:`
-
-`class Estimator:`
-
-`def **init** (self, columns, estimator_name, output_label, evaluator: Evaluator, *args, **kwargs)`
-
-`train`
-
-`evaluate(`
-
-`evaluate (Y_pred, Y, evaluator: Evaluator)` o `evaluate(Y_pred,Y)`
-
-`class ScikitLearnEstimator (Estimator):`
-
-`class DeepLearningEstimator(Estimator):`
-
-`scikit_estimator = ScikitLearnEstimator(args, kwargs)`
-
-`deep_estimator = DeepLearningEstimator(args,kwargs)`
-
-`estimators: list[Estimator] = [`
-
-`scikit_estimator,`
-
-`deep_estimator,`
-
-`]`
-
-`for estimator in estimator:`
-
-`metrics[estimator.estimator_name] = estimator.evaluate(Y,Y_pred)`
-
-`visualize_metrics(metrics)`
-
-## Data Analytics | Visualizar la info (Estadística) Outputs y evaluación final
-
-- Dados los resultados y concluir:
-    - visualizar clusters
-    - Métricas de predicción
-- Testear modelo final por feature
-
-## Teoría de ejecución ideal (Almacenamiento)
-
-- Cómo el proyecto se ejecturaría a gran escala? (Usar AWS, Scrapear datos de Zillow, SageMaker)
-- Data extraction
-    - Zillow (batches)
-    - scheduled Jobs (Cron-jobs)
-        - updating dataset
-        - fine-tuning the model
-
-### Para el jueves 15 de Mayo
-
-1. EDA ⇒ Prieto, Jorge
-2. Modelo ⇒ Jorge, Juan Camilo, Prieto
-    1. Evaluar dado unos datos (Y, Y_pred) 
-    2. Escoger modelos
-3. Data Analytics + Teoría de Almacenamiento ⇒ Daniel
-4. Orchestrador: Revisar PR's, calidad ⇒ Juan Camilo
