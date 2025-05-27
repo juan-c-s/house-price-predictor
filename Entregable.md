@@ -120,7 +120,8 @@ This project implements a machine learning solution for predicting house prices 
   - Paginated data display
   - Interactive filtering and sorting
   - Direct S3 bucket querying refined zone
-  
+  ![Dash app](evidence/Dash-app.jpg)
+
 
 ## Evidence of AWS Implementation
 
@@ -148,6 +149,10 @@ This project implements a machine learning solution for predicting house prices 
    - S3 data writing operations
    - Pipeline monitoring and debugging
 ![Writing to bucket error](evidence/jupyter2.jpg)
+
+6. **Athena integration (Data Warehouse)**
+    - Set up automatic data cataloging with **AWS Glue** to understand data structure
+    - Ready for future SQL queries and reporting
 
 ## Project Structure
 ```
