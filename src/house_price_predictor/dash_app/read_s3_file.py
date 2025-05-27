@@ -2,6 +2,7 @@ import os
 import boto3
 import pandas as pd
 from io import BytesIO
+from loguru import logger
 
 def read_from_s3(bucket_name, file_key, file_type='csv'):
     """
@@ -12,12 +13,14 @@ def read_from_s3(bucket_name, file_key, file_type='csv'):
         file_type (str): Type of file to read ('csv' or 'parquet')
     """
     try:
+        logger.info(f"Reading from S3 bucket: {bucket_name}, file key: {file_key}, file type: {file_type}")
         # Initialize S3 client
         s3_client = boto3.client(
             's3',
             aws_access_key_id=os.getenv('aws_access_key_id'),
             aws_secret_access_key=os.getenv('aws_secret_access_key'),
             aws_session_token=os.getenv('aws_session_token')
+            
         )
         
         # Get the object from S3
@@ -37,8 +40,9 @@ def read_from_s3(bucket_name, file_key, file_type='csv'):
         
         return df
     
+
     except Exception as e:
-        print(f"Error reading from S3: {str(e)}")
+        logger.error(f"Error reading from S3: {str(e)}")
         return None
 # Example usage:
 # For CSV:
