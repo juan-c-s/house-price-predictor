@@ -20,6 +20,8 @@ dependencies = [
     "scikit-learn>=1.6.1",
     "seaborn>=0.13.2",
     "xgboost>=3.0.2",
+    "python-dotenv==1.0.0",
+    "dash-mantine-components==0.10.0"
 ]
 
 [project.scripts]
