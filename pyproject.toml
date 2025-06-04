@@ -12,6 +12,8 @@ dependencies = [
     "mlflow>=2.22.0",
     "pandas>=2.2.3",
     "scikit-learn>=1.6.1",
+    "tensorflow>=2.19.0",
+    "torch>=2.7.0",
     "xgboost>=3.0.1",
 ]
 
